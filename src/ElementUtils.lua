@@ -16,6 +16,68 @@ local ElementUtils = {}
 ]]
 ElementUtils.UseParentKey = Symbol.named("UseParentKey")
 
+local function tableIterator(elements)
+	local state = {
+		elements = elements,
+		returnTable = nil,
+		previous = nil,
+	}
+	local keyStack = {}
+	local keyStackIndex = 0
+
+	local pushState
+	local popState
+
+	local function nextElement(state, previous)
+		local nextKey, nextValue = next(state.elements, state.previous)
+
+		if nextKey == nil then
+			if state.returnTable == nil then
+				return nil
+			else
+				popState()
+				return nextElement(state)
+			end
+		end
+
+		if Type.of(nextValue) == Type.Fragment then
+			pushState(nextKey, nextValue)
+			return nextElement(state)
+		end
+
+		state.previous = nextKey
+		
+		if keyStackIndex == 0 then
+			return nextKey, nextValue
+		else
+			return keyStack, nextValue
+		end
+	end
+
+	function pushState(key, value)
+		keyStackIndex = keyStackIndex + 1
+		keyStack[keyStackIndex] = key
+
+		state.returnTable = {
+			elements = state.elements,
+			returnTable = state.returnTable,
+			previous = key,
+		}
+		state.elements = value.elements
+		state.previous = nil
+	end
+
+	function popState()
+		keyStack[keyStackIndex] = nil
+		keyStackIndex = keyStackIndex - 1
+
+		state.elements = state.returnTable.elements
+		state.previous = state.returnTable.previous
+		state.returnTable = state.returnTable.returnTable
+	end
+
+	return nextElement, state
+end
 --[[
 	Returns an iterator over the children of an element.
 	`elementOrElements` may be one of:
@@ -65,7 +127,7 @@ function ElementUtils.iterateElements(elementOrElements)
 	end
 
 	if regularType == "table" then
-		return pairs(elementOrElements)
+		return tableIterator(elementOrElements)
 	end
 
 	error("Invalid elements")
@@ -98,7 +160,17 @@ function ElementUtils.getElementByKey(elements, hostKey)
 	end
 
 	if typeof(elements) == "table" then
-		return elements[hostKey]
+		if type(hostKey) == "table" then
+			local element = elements
+
+			for i=1, #hostKey do
+				element = ElementUtils.getElementByKey(element, hostKey[i])
+			end
+
+			return element
+		else
+			return elements[hostKey]
+		end
 	end
 
 	error("Invalid elements")

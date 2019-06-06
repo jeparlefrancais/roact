@@ -62,7 +62,7 @@ local function createReconciler(renderer)
 		local removeKeys = {}
 
 		-- Changed or removed children
-		for childKey, childNode in pairs(virtualNode.children) do
+		for childKey, childNode in ElementUtils.iterateElements(virtualNode.children) do
 			local newElement = ElementUtils.getElementByKey(newChildElements, childKey)
 			local newNode = updateVirtualNode(childNode, newElement)
 

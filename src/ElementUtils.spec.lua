@@ -59,6 +59,45 @@ return function()
 			expect(seenChildren[children.b]).to.equal("b")
 		end)
 
+		it("should iterate over fragments in tables", function()
+			local children = {
+				fragments = createFragment({
+					a = createElement("TextLabel"),
+					b = createElement("TextLabel"),
+				}),
+			}
+
+			local seenChildren = {}
+			local count = 0
+
+			for key, child in ElementUtils.iterateElements(children) do
+				seenChildren[child] = true
+				count = count + 1
+			end
+
+			expect(count).to.equal(2)
+			expect(seenChildren[children.fragments.elements.a]).to.equal(true)
+			expect(seenChildren[children.fragments.elements.b]).to.equal(true)
+		end)
+
+		it("should skip empty fragments in tables", function()
+			local children = {
+				fragments = createFragment({}),
+				a = createElement("TextLabel"),
+			}
+
+			local seenChildren = {}
+			local count = 0
+
+			for key, child in ElementUtils.iterateElements(children) do
+				seenChildren[child] = true
+				count = count + 1
+			end
+
+			expect(count).to.equal(1)
+			expect(seenChildren[children.a]).to.equal(true)
+		end)
+
 		it("should return a zero-element iterator for booleans", function()
 			local booleanIterator = ElementUtils.iterateElements(false)
 			expect(booleanIterator()).to.equal(nil)
@@ -121,6 +160,30 @@ return function()
 			local children = createFragment({})
 
 			expect(ElementUtils.getElementByKey(children, "a")).to.equal(nil)
+		end)
+
+		it("should return an element in a fragment", function()
+			local children = {
+				a = createElement("TextLabel"),
+				b = createFragment({
+					c = createElement("TextLabel"),
+				}),
+			}
+
+			expect(ElementUtils.getElementByKey(children, {"b", "c"})).to.equal(children.b.elements.c)
+		end)
+
+		it("should prevent key collisions", function()
+			local children = {
+				a = createElement("TextLabel"),
+				b = createFragment({
+					b = createFragment({
+						b = createElement("TextLabel"),
+					}),
+				}),
+			}
+
+			expect(ElementUtils.getElementByKey(children, {"b", "b", "b"})).to.equal(children.b.elements.b.elements.b)
 		end)
 	end)
 end
