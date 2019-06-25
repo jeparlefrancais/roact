@@ -16,7 +16,7 @@ return function()
 
 	local reconciler = createReconciler(RobloxRenderer)
 
-	describe("mountHostNode", function()
+	describe("_mountHostNode", function()
 		it("should create instances with correct props", function()
 			local parent = Instance.new("Folder")
 			local value = "Hello!"
@@ -28,7 +28,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -57,7 +57,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -92,7 +92,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -105,7 +105,7 @@ return function()
 
 			expect(instance.Value).to.equal(20)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should connect Binding refs", function()
@@ -119,7 +119,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -128,7 +128,7 @@ return function()
 			expect(ref.current).to.be.ok()
 			expect(ref.current).to.equal(instance)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should call function refs", function()
@@ -142,7 +142,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -151,7 +151,7 @@ return function()
 			expect(spyRef.callCount).to.equal(1)
 			spyRef:assertCalledWith(instance)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should throw if setting invalid instance properties", function()
@@ -169,7 +169,7 @@ return function()
 
 				local node = reconciler.createVirtualNode(element, parent, key)
 
-				local success, message = pcall(RobloxRenderer.mountHostNode, reconciler, node)
+				local success, message = pcall(RobloxRenderer._mountHostNode, reconciler, node)
 				assert(not success, "Expected call to fail")
 
 				expect(message:find("Frob")).to.be.ok()
@@ -179,7 +179,7 @@ return function()
 		end)
 	end)
 
-	describe("updateHostNode", function()
+	describe("_updateHostNode", function()
 		it("should update node props and children", function()
 			-- TODO: Break up test
 
@@ -208,9 +208,9 @@ return function()
 			})
 
 			local node = reconciler.createVirtualNode(element, parent, key)
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
-			-- Not testing mountHostNode's work here, only testing that the
+			-- Not testing _mountHostNode's work here, only testing that the
 			-- node is properly updated.
 
 			local newElement = createElement("StringValue", {
@@ -231,7 +231,7 @@ return function()
 				ChildE = createElement("Folder", {}),
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 
 			local root = parent[key]
 			expect(root.ClassName).to.equal("StringValue")
@@ -265,7 +265,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			local instance = parent:GetChildren()[1]
 
@@ -276,7 +276,7 @@ return function()
 				Value = bindingB,
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 
 			expect(instance.Value).to.equal(99)
 
@@ -288,7 +288,7 @@ return function()
 
 			expect(instance.Value).to.equal(123)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should update Binding refs", function()
@@ -304,7 +304,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -317,12 +317,12 @@ return function()
 				[Ref] = refB,
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 
 			expect(refA.current).never.to.be.ok()
 			expect(refB.current).to.equal(instance)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should call old function refs with nil and new function refs with a valid rbx", function()
@@ -338,7 +338,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -352,14 +352,14 @@ return function()
 				[Ref] = spyRefB.value,
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 
 			expect(spyRefA.callCount).to.equal(2)
 			spyRefA:assertCalledWith(nil)
 			expect(spyRefB.callCount).to.equal(1)
 			spyRefB:assertCalledWith(instance)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 		end)
 
 		it("should not call function refs again if they didn't change", function()
@@ -375,7 +375,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -389,7 +389,7 @@ return function()
 				[Ref] = spyRef.value,
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 
 			-- Not called again
 			expect(spyRef.callCount).to.equal(1)
@@ -410,9 +410,9 @@ return function()
 				})
 
 				local node = reconciler.createVirtualNode(firstElement, parent, key)
-				RobloxRenderer.mountHostNode(reconciler, node)
+				RobloxRenderer._mountHostNode(reconciler, node)
 
-				local success, message = pcall(RobloxRenderer.updateHostNode, reconciler, node, secondElement)
+				local success, message = pcall(RobloxRenderer._updateHostNode, reconciler, node, secondElement)
 				assert(not success, "Expected call to fail")
 
 				expect(message:find("Frob")).to.be.ok()
@@ -433,7 +433,7 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(#parent:GetChildren()).to.equal(1)
 
@@ -444,12 +444,12 @@ return function()
 				Size = UDim2.new(0.5, 0, 0.5, 0),
 			})
 
-			RobloxRenderer.updateHostNode(reconciler, node, newElement)
+			RobloxRenderer._updateHostNode(reconciler, node, newElement)
 			expect(#instance:GetChildren()).to.equal(0)
 		end)
 	end)
 
-	describe("unmountHostNode", function()
+	describe("_unmountHostNode", function()
 		it("should delete instances from the inside-out", function()
 			local parent = Instance.new("Folder")
 			local key = "Root"
@@ -471,7 +471,7 @@ return function()
 
 			local grandchild = child:GetChildren()[1]
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 
 			expect(grandchild.Parent).to.equal(nil)
 			expect(child.Parent).to.equal(nil)
@@ -489,13 +489,13 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			local instance = parent:GetChildren()[1]
 
 			expect(instance.Value).to.equal(10)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 			update(56)
 
 			expect(instance.Value).to.equal(10)
@@ -512,11 +512,11 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(ref.current).to.be.ok()
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 
 			expect(ref.current).never.to.be.ok()
 		end)
@@ -532,11 +532,11 @@ return function()
 
 			local node = reconciler.createVirtualNode(element, parent, key)
 
-			RobloxRenderer.mountHostNode(reconciler, node)
+			RobloxRenderer._mountHostNode(reconciler, node)
 
 			expect(spyRef.callCount).to.equal(1)
 
-			RobloxRenderer.unmountHostNode(reconciler, node)
+			RobloxRenderer._unmountHostNode(node)
 
 			expect(spyRef.callCount).to.equal(2)
 			spyRef:assertCalledWith(nil)

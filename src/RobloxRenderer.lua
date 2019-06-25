@@ -176,7 +176,80 @@ function RobloxRenderer.isHostObject(target)
 	return typeof(target) == "Instance"
 end
 
-function RobloxRenderer.mountHostNode(reconciler, virtualNode)
+function RobloxRenderer.mountVirtualNode(reconciler, virtualNode)
+	local element = virtualNode.currentElement
+	local kind = ElementKind.of(element)
+
+	if kind == ElementKind.Host then
+		RobloxRenderer._mountHostNode(reconciler, virtualNode)
+	elseif kind == ElementKind.Function then
+		RobloxRenderer._mountFunctionVirtualNode(reconciler, virtualNode)
+	elseif kind == ElementKind.Stateful then
+		element.component:__mount(reconciler, virtualNode)
+	elseif kind == ElementKind.Portal then
+		RobloxRenderer._mountPortalVirtualNode(reconciler, virtualNode)
+	elseif kind == ElementKind.Fragment then
+		RobloxRenderer._mountFragmentVirtualNode(reconciler, virtualNode)
+	else
+		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
+	end
+end
+
+function RobloxRenderer.updateVirtualNode(reconciler, virtualNode, newElement, newState)
+	local kind = ElementKind.of(newElement)
+
+	local shouldContinueUpdate = true
+
+	if kind == ElementKind.Host then
+		virtualNode = RobloxRenderer._updateHostNode(reconciler, virtualNode, newElement)
+	elseif kind == ElementKind.Function then
+		virtualNode = RobloxRenderer._updateFunctionVirtualNode(reconciler, virtualNode, newElement)
+	elseif kind == ElementKind.Stateful then
+		shouldContinueUpdate = virtualNode.instance:__update(newElement, newState)
+	elseif kind == ElementKind.Portal then
+		virtualNode = RobloxRenderer._updatePortalVirtualNode(reconciler, virtualNode, newElement)
+	elseif kind == ElementKind.Fragment then
+		virtualNode = RobloxRenderer._updateFragmentVirtualNode(reconciler, virtualNode, newElement)
+	else
+		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
+	end
+
+	if shouldContinueUpdate then
+		virtualNode.currentElement = newElement
+	end
+
+	return virtualNode
+end
+
+function RobloxRenderer.unmountVirtualNode(virtualNode)
+	if config.internalTypeChecks then
+		internalAssert(Type.of(virtualNode) == Type.VirtualNode, "Expected arg #1 to be of type VirtualNode")
+	end
+
+	local kind = ElementKind.of(virtualNode.currentElement)
+
+	if kind == ElementKind.Host then
+		RobloxRenderer._unmountHostNode(virtualNode)
+	elseif kind == ElementKind.Function then
+		for _, childNode in pairs(virtualNode.children) do
+			RobloxRenderer.unmountVirtualNode(childNode)
+		end
+	elseif kind == ElementKind.Stateful then
+		virtualNode.instance:__unmount()
+	elseif kind == ElementKind.Portal then
+		for _, childNode in pairs(virtualNode.children) do
+			RobloxRenderer.unmountVirtualNode(childNode)
+		end
+	elseif kind == ElementKind.Fragment then
+		for _, childNode in pairs(virtualNode.children) do
+			RobloxRenderer.unmountVirtualNode(childNode)
+		end
+	else
+		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
+	end
+end
+
+function RobloxRenderer._mountHostNode(reconciler, virtualNode)
 	local element = virtualNode.currentElement
 	local hostParent = virtualNode.hostParent
 	local hostKey = virtualNode.hostKey
@@ -225,13 +298,13 @@ function RobloxRenderer.mountHostNode(reconciler, virtualNode)
 	end
 end
 
-function RobloxRenderer.unmountHostNode(reconciler, virtualNode)
+function RobloxRenderer._unmountHostNode(virtualNode)
 	local element = virtualNode.currentElement
 
 	applyRef(element.props[Ref], nil)
 
 	for _, childNode in pairs(virtualNode.children) do
-		reconciler.unmountVirtualNode(childNode)
+		RobloxRenderer.unmountVirtualNode(childNode)
 	end
 
 	detachAllBindings(virtualNode)
@@ -239,7 +312,33 @@ function RobloxRenderer.unmountHostNode(reconciler, virtualNode)
 	virtualNode.hostObject:Destroy()
 end
 
-function RobloxRenderer.updateHostNode(reconciler, virtualNode, newElement)
+function RobloxRenderer._mountFunctionVirtualNode(reconciler, virtualNode)
+	local element = virtualNode.currentElement
+
+	local children = element.component(element.props)
+
+	reconciler.updateVirtualNodeWithRenderResult(virtualNode, virtualNode.hostParent, children)
+end
+
+function RobloxRenderer._mountPortalVirtualNode(reconciler, virtualNode)
+	local element = virtualNode.currentElement
+
+	local targetHostParent = element.props.target
+	local children = element.props[Children]
+
+	assert(RobloxRenderer.isHostObject(targetHostParent), "Expected target to be host object")
+
+	reconciler.updateVirtualNodeWithChildren(virtualNode, targetHostParent, children)
+end
+
+function RobloxRenderer._mountFragmentVirtualNode(reconciler, virtualNode)
+	local element = virtualNode.currentElement
+	local children = element.elements
+
+	reconciler.updateVirtualNodeWithChildren(virtualNode, virtualNode.hostParent, children)
+end
+
+function RobloxRenderer._updateHostNode(reconciler, virtualNode, newElement)
 	local oldProps = virtualNode.currentElement.props
 	local newProps = newElement.props
 
@@ -280,102 +379,7 @@ function RobloxRenderer.updateHostNode(reconciler, virtualNode, newElement)
 	return virtualNode
 end
 
-function RobloxRenderer.mountVirtualNode(reconciler, virtualNode)
-	local element = virtualNode.currentElement
-	local kind = ElementKind.of(element)
-
-	if kind == ElementKind.Host then
-		RobloxRenderer.mountHostNode(reconciler, virtualNode)
-	elseif kind == ElementKind.Function then
-		RobloxRenderer.mountFunctionVirtualNode(reconciler, virtualNode)
-	elseif kind == ElementKind.Stateful then
-		element.component:__mount(reconciler, virtualNode)
-	elseif kind == ElementKind.Portal then
-		RobloxRenderer.mountPortalVirtualNode(reconciler, virtualNode)
-	elseif kind == ElementKind.Fragment then
-		RobloxRenderer.mountFragmentVirtualNode(reconciler, virtualNode)
-	else
-		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-	end
-end
-
-function RobloxRenderer.mountFunctionVirtualNode(reconciler, virtualNode)
-	local element = virtualNode.currentElement
-
-	local children = element.component(element.props)
-
-	reconciler.updateVirtualNodeWithRenderResult(virtualNode, virtualNode.hostParent, children)
-end
-
-function RobloxRenderer.mountPortalVirtualNode(reconciler, virtualNode)
-	local element = virtualNode.currentElement
-
-	local targetHostParent = element.props.target
-	local children = element.props[Children]
-
-	assert(RobloxRenderer.isHostObject(targetHostParent), "Expected target to be host object")
-
-	reconciler.updateVirtualNodeWithChildren(virtualNode, targetHostParent, children)
-end
-
-function RobloxRenderer.mountFragmentVirtualNode(reconciler, virtualNode)
-	local element = virtualNode.currentElement
-	local children = element.elements
-
-	reconciler.updateVirtualNodeWithChildren(virtualNode, virtualNode.hostParent, children)
-end
-
-function RobloxRenderer.unmountVirtualNode(reconciler, virtualNode)
-	local kind = ElementKind.of(virtualNode.currentElement)
-
-	if kind == ElementKind.Host then
-		RobloxRenderer.unmountHostNode(reconciler, virtualNode)
-	elseif kind == ElementKind.Function then
-		for _, childNode in pairs(virtualNode.children) do
-			reconciler.unmountVirtualNode(childNode)
-		end
-	elseif kind == ElementKind.Stateful then
-		virtualNode.instance:__unmount()
-	elseif kind == ElementKind.Portal then
-		for _, childNode in pairs(virtualNode.children) do
-			reconciler.unmountVirtualNode(childNode)
-		end
-	elseif kind == ElementKind.Fragment then
-		for _, childNode in pairs(virtualNode.children) do
-			reconciler.unmountVirtualNode(childNode)
-		end
-	else
-		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-	end
-end
-
-function RobloxRenderer.updateVirtualNode(reconciler, virtualNode, newElement, newState)
-	local kind = ElementKind.of(newElement)
-
-	local shouldContinueUpdate = true
-
-	if kind == ElementKind.Host then
-		virtualNode = RobloxRenderer.updateHostNode(reconciler, virtualNode, newElement)
-	elseif kind == ElementKind.Function then
-		virtualNode = RobloxRenderer.updateFunctionVirtualNode(reconciler, virtualNode, newElement)
-	elseif kind == ElementKind.Stateful then
-		shouldContinueUpdate = virtualNode.instance:__update(newElement, newState)
-	elseif kind == ElementKind.Portal then
-		virtualNode = RobloxRenderer.updatePortalVirtualNode(reconciler, virtualNode, newElement)
-	elseif kind == ElementKind.Fragment then
-		virtualNode = RobloxRenderer.updateFragmentVirtualNode(reconciler, virtualNode, newElement)
-	else
-		error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-	end
-
-	if shouldContinueUpdate then
-		virtualNode.currentElement = newElement
-	end
-
-	return virtualNode
-end
-
-function RobloxRenderer.updateFunctionVirtualNode(reconciler, virtualNode, newElement)
+function RobloxRenderer._updateFunctionVirtualNode(reconciler, virtualNode, newElement)
 	local children = newElement.component(newElement.props)
 
 	reconciler.updateVirtualNodeWithRenderResult(virtualNode, virtualNode.hostParent, children)
@@ -383,7 +387,7 @@ function RobloxRenderer.updateFunctionVirtualNode(reconciler, virtualNode, newEl
 	return virtualNode
 end
 
-function RobloxRenderer.updatePortalVirtualNode(reconciler, virtualNode, newElement)
+function RobloxRenderer._updatePortalVirtualNode(reconciler, virtualNode, newElement)
 	local oldElement = virtualNode.currentElement
 	local oldTargetHostParent = oldElement.props.target
 
@@ -402,7 +406,7 @@ function RobloxRenderer.updatePortalVirtualNode(reconciler, virtualNode, newElem
 	return virtualNode
 end
 
-function RobloxRenderer.updateFragmentVirtualNode(reconciler, virtualNode, newElement)
+function RobloxRenderer._updateFragmentVirtualNode(reconciler, virtualNode, newElement)
 	reconciler.updateVirtualNodeWithChildren(virtualNode, virtualNode.hostParent, newElement.elements)
 
 	return virtualNode

@@ -23,7 +23,6 @@ local function createReconciler(renderer)
 	local reconciler
 	local mountVirtualNode
 	local updateVirtualNode
-	local unmountVirtualNode
 
 	--[[
 		Unmount the given virtualNode, replacing it with a new node described by
@@ -37,7 +36,7 @@ local function createReconciler(renderer)
 		local depth = virtualNode.depth
 		local parentContext = virtualNode.parentContext
 
-		unmountVirtualNode(virtualNode)
+		renderer.unmountVirtualNode(virtualNode)
 		local newNode = mountVirtualNode(newElement, hostParent, hostKey, parentContext)
 
 		-- mountVirtualNode can return nil if the element is a boolean
@@ -115,17 +114,6 @@ local function createReconciler(renderer)
 	end
 
 	--[[
-		Unmounts the given virtual node and releases any held resources.
-	]]
-	function unmountVirtualNode(virtualNode)
-		if config.internalTypeChecks then
-			internalAssert(Type.of(virtualNode) == Type.VirtualNode, "Expected arg #1 to be of type VirtualNode")
-		end
-
-		renderer.unmountVirtualNode(reconciler, virtualNode)
-	end
-
-	--[[
 		Update the given virtual node using a new element describing what it
 		should transform into.
 
@@ -154,7 +142,7 @@ local function createReconciler(renderer)
 		end
 
 		if typeof(newElement) == "boolean" or newElement == nil then
-			unmountVirtualNode(virtualNode)
+			renderer.unmountVirtualNode(virtualNode)
 			return nil
 		end
 
@@ -269,7 +257,7 @@ local function createReconciler(renderer)
 		internalData.mounted = false
 
 		if internalData.rootNode ~= nil then
-			unmountVirtualNode(internalData.rootNode)
+			renderer.unmountVirtualNode(internalData.rootNode)
 		end
 	end
 
@@ -296,7 +284,7 @@ local function createReconciler(renderer)
 
 		createVirtualNode = createVirtualNode,
 		mountVirtualNode = mountVirtualNode,
-		unmountVirtualNode = unmountVirtualNode,
+		unmountVirtualNode = renderer.unmountVirtualNode,
 		updateVirtualNode = updateVirtualNode,
 		updateVirtualNodeWithChildren = updateVirtualNodeWithChildren,
 		updateVirtualNodeWithRenderResult = updateVirtualNodeWithRenderResult,
