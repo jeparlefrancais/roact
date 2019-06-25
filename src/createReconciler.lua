@@ -1,7 +1,5 @@
 local Type = require(script.Parent.Type)
-local ElementKind = require(script.Parent.ElementKind)
 local ElementUtils = require(script.Parent.ElementUtils)
-local Children = require(script.Parent.PropMarkers.Children)
 local Symbol = require(script.Parent.Symbol)
 local internalAssert = require(script.Parent.internalAssert)
 
@@ -124,60 +122,7 @@ local function createReconciler(renderer)
 			internalAssert(Type.of(virtualNode) == Type.VirtualNode, "Expected arg #1 to be of type VirtualNode")
 		end
 
-		local kind = ElementKind.of(virtualNode.currentElement)
-
-		if kind == ElementKind.Host then
-			renderer.unmountHostNode(reconciler, virtualNode)
-		elseif kind == ElementKind.Function then
-			for _, childNode in pairs(virtualNode.children) do
-				unmountVirtualNode(childNode)
-			end
-		elseif kind == ElementKind.Stateful then
-			virtualNode.instance:__unmount()
-		elseif kind == ElementKind.Portal then
-			for _, childNode in pairs(virtualNode.children) do
-				unmountVirtualNode(childNode)
-			end
-		elseif kind == ElementKind.Fragment then
-			for _, childNode in pairs(virtualNode.children) do
-				unmountVirtualNode(childNode)
-			end
-		else
-			error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-		end
-	end
-
-	local function updateFunctionVirtualNode(virtualNode, newElement)
-		local children = newElement.component(newElement.props)
-
-		updateVirtualNodeWithRenderResult(virtualNode, virtualNode.hostParent, children)
-
-		return virtualNode
-	end
-
-	local function updatePortalVirtualNode(virtualNode, newElement)
-		local oldElement = virtualNode.currentElement
-		local oldTargetHostParent = oldElement.props.target
-
-		local targetHostParent = newElement.props.target
-
-		assert(renderer.isHostObject(targetHostParent), "Expected target to be host object")
-
-		if targetHostParent ~= oldTargetHostParent then
-			return replaceVirtualNode(virtualNode, newElement)
-		end
-
-		local children = newElement.props[Children]
-
-		updateVirtualNodeWithChildren(virtualNode, targetHostParent, children)
-
-		return virtualNode
-	end
-
-	local function updateFragmentVirtualNode(virtualNode, newElement)
-		updateVirtualNodeWithChildren(virtualNode, virtualNode.hostParent, newElement.elements)
-
-		return virtualNode
+		renderer.unmountVirtualNode(reconciler, virtualNode)
 	end
 
 	--[[
@@ -217,33 +162,7 @@ local function createReconciler(renderer)
 			return replaceVirtualNode(virtualNode, newElement)
 		end
 
-		local kind = ElementKind.of(newElement)
-
-		local shouldContinueUpdate = true
-
-		if kind == ElementKind.Host then
-			virtualNode = renderer.updateHostNode(reconciler, virtualNode, newElement)
-		elseif kind == ElementKind.Function then
-			virtualNode = updateFunctionVirtualNode(virtualNode, newElement)
-		elseif kind == ElementKind.Stateful then
-			shouldContinueUpdate = virtualNode.instance:__update(newElement, newState)
-		elseif kind == ElementKind.Portal then
-			virtualNode = updatePortalVirtualNode(virtualNode, newElement)
-		elseif kind == ElementKind.Fragment then
-			virtualNode = updateFragmentVirtualNode(virtualNode, newElement)
-		else
-			error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-		end
-
-		-- Stateful components can abort updates via shouldUpdate. If that
-		-- happens, we should stop doing stuff at this point.
-		if not shouldContinueUpdate then
-			return virtualNode
-		end
-
-		virtualNode.currentElement = newElement
-
-		return virtualNode
+		return renderer.updateVirtualNode(reconciler, virtualNode, newElement, newState)
 	end
 
 	--[[
@@ -276,32 +195,6 @@ local function createReconciler(renderer)
 		}
 	end
 
-	local function mountFunctionVirtualNode(virtualNode)
-		local element = virtualNode.currentElement
-
-		local children = element.component(element.props)
-
-		updateVirtualNodeWithRenderResult(virtualNode, virtualNode.hostParent, children)
-	end
-
-	local function mountPortalVirtualNode(virtualNode)
-		local element = virtualNode.currentElement
-
-		local targetHostParent = element.props.target
-		local children = element.props[Children]
-
-		assert(renderer.isHostObject(targetHostParent), "Expected target to be host object")
-
-		updateVirtualNodeWithChildren(virtualNode, targetHostParent, children)
-	end
-
-	local function mountFragmentVirtualNode(virtualNode)
-		local element = virtualNode.currentElement
-		local children = element.elements
-
-		updateVirtualNodeWithChildren(virtualNode, virtualNode.hostParent, children)
-	end
-
 	--[[
 		Constructs a new virtual node and mounts it, but does not place it into
 		the tree.
@@ -324,23 +217,9 @@ local function createReconciler(renderer)
 			return nil
 		end
 
-		local kind = ElementKind.of(element)
-
 		local virtualNode = createVirtualNode(element, hostParent, hostKey, context)
 
-		if kind == ElementKind.Host then
-			renderer.mountHostNode(reconciler, virtualNode)
-		elseif kind == ElementKind.Function then
-			mountFunctionVirtualNode(virtualNode)
-		elseif kind == ElementKind.Stateful then
-			element.component:__mount(reconciler, virtualNode)
-		elseif kind == ElementKind.Portal then
-			mountPortalVirtualNode(virtualNode)
-		elseif kind == ElementKind.Fragment then
-			mountFragmentVirtualNode(virtualNode)
-		else
-			error(("Unknown ElementKind %q"):format(tostring(kind), 2))
-		end
+		renderer.mountVirtualNode(reconciler, virtualNode)
 
 		return virtualNode
 	end
@@ -421,6 +300,8 @@ local function createReconciler(renderer)
 		updateVirtualNode = updateVirtualNode,
 		updateVirtualNodeWithChildren = updateVirtualNodeWithChildren,
 		updateVirtualNodeWithRenderResult = updateVirtualNodeWithRenderResult,
+
+		replaceVirtualNode = replaceVirtualNode,
 	}
 
 	return reconciler

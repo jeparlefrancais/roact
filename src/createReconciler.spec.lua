@@ -1,5 +1,4 @@
 return function()
-	local assign = require(script.Parent.assign)
 	local createElement = require(script.Parent.createElement)
 	local createFragment = require(script.Parent.createFragment)
 	local createSpy = require(script.Parent.createSpy)
@@ -82,90 +81,6 @@ return function()
 			expect(function()
 				noopReconciler.mountVirtualNode(createElement(returnsTable), hostParent, key)
 			end).to.throw()
-		end)
-	end)
-
-	describe("Host components", function()
-		it("should invoke the renderer to mount host nodes", function()
-			local mountHostNode = createSpy(NoopRenderer.mountHostNode)
-
-			local renderer = assign({}, NoopRenderer, {
-				mountHostNode = mountHostNode.value,
-			})
-
-			local reconciler = createReconciler(renderer)
-
-			local element = createElement("StringValue")
-			local hostParent = nil
-			local key = "Some Key"
-			local node = reconciler.mountVirtualNode(element, hostParent, key)
-
-			expect(Type.of(node)).to.equal(Type.VirtualNode)
-
-			expect(mountHostNode.callCount).to.equal(1)
-
-			local values = mountHostNode:captureValues("reconciler", "node")
-
-			expect(values.reconciler).to.equal(reconciler)
-			expect(values.node).to.equal(node)
-		end)
-
-		it("should invoke the renderer to update host nodes", function()
-			local updateHostNode = createSpy(NoopRenderer.updateHostNode)
-
-			local renderer = assign({}, NoopRenderer, {
-				mountHostNode = NoopRenderer.mountHostNode,
-				updateHostNode = updateHostNode.value,
-			})
-
-			local reconciler = createReconciler(renderer)
-
-			local element = createElement("StringValue")
-			local hostParent = nil
-			local key = "Key"
-			local node = reconciler.mountVirtualNode(element, hostParent, key)
-
-			expect(Type.of(node)).to.equal(Type.VirtualNode)
-
-			local newElement = createElement("StringValue")
-			local newNode = reconciler.updateVirtualNode(node, newElement)
-
-			expect(newNode).to.equal(node)
-
-			expect(updateHostNode.callCount).to.equal(1)
-
-			local values = updateHostNode:captureValues("reconciler", "node", "newElement")
-
-			expect(values.reconciler).to.equal(reconciler)
-			expect(values.node).to.equal(node)
-			expect(values.newElement).to.equal(newElement)
-		end)
-
-		it("should invoke the renderer to unmount host nodes", function()
-			local unmountHostNode = createSpy(NoopRenderer.unmountHostNode)
-
-			local renderer = assign({}, NoopRenderer, {
-				mountHostNode = NoopRenderer.mountHostNode,
-				unmountHostNode = unmountHostNode.value,
-			})
-
-			local reconciler = createReconciler(renderer)
-
-			local element = createElement("StringValue")
-			local hostParent = nil
-			local key = "Key"
-			local node = reconciler.mountVirtualNode(element, hostParent, key)
-
-			expect(Type.of(node)).to.equal(Type.VirtualNode)
-
-			reconciler.unmountVirtualNode(node)
-
-			expect(unmountHostNode.callCount).to.equal(1)
-
-			local values = unmountHostNode:captureValues("reconciler", "node")
-
-			expect(values.reconciler).to.equal(reconciler)
-			expect(values.node).to.equal(node)
 		end)
 	end)
 
