@@ -1,0 +1,769 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+        <link rel="canonical" href="https://roblox.github.io/roact/performance/reduce-reconciliation/">
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+    
+    
+      
+        <title>Reduce Reconcilation - Roact Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#03a9f4">
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
+    
+    
+      <link rel="stylesheet" href="../../extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="light-blue" data-md-color-accent="light-blue">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#shouldupdate-lifecycle-method" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://roblox.github.io/roact/" title="Roact Documentation" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              Roact Documentation
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Reduce Reconcilation
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+<a href="https://github.com/Roblox/roact/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    Roblox/roact
+  </div>
+</a>
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main" role="main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="https://roblox.github.io/roact/" title="Roact Documentation" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    Roact Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+<a href="https://github.com/Roblox/roact/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    Roblox/roact
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Home" class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Guide
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Guide
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/installation/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/hello-roact/" title="Hello, Roact!" class="md-nav__link">
+      Hello, Roact!
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/elements/" title="Elements" class="md-nav__link">
+      Elements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/components/" title="Components" class="md-nav__link">
+      Components
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/state-and-lifecycle/" title="State and Lifecycle" class="md-nav__link">
+      State and Lifecycle
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../guide/events/" title="Events" class="md-nav__link">
+      Events
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Advanced Concepts
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Advanced Concepts
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../advanced/fragments/" title="Fragments" class="md-nav__link">
+      Fragments
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../advanced/portals/" title="Portals" class="md-nav__link">
+      Portals
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../advanced/bindings-and-refs/" title="Bindings and Refs" class="md-nav__link">
+      Bindings and Refs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../advanced/context/" title="Context" class="md-nav__link">
+      Context
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
+      Performance Optimization
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Performance Optimization
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../overview/" title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Reduce Reconcilation
+      </label>
+    
+    <a href="./" title="Reduce Reconcilation" class="md-nav__link md-nav__link--active">
+      Reduce Reconcilation
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#shouldupdate-lifecycle-method" class="md-nav__link">
+    shouldUpdate Lifecycle Method
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#purecomponent" class="md-nav__link">
+    PureComponent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stable-keys" class="md-nav__link">
+    Stable Keys
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../api-reference/" title="API Reference" class="md-nav__link">
+      API Reference
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#shouldupdate-lifecycle-method" class="md-nav__link">
+    shouldUpdate Lifecycle Method
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#purecomponent" class="md-nav__link">
+    PureComponent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stable-keys" class="md-nav__link">
+    Stable Keys
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/Roblox/roact/edit/master/docs/performance/reduce-reconciliation.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>Reduce Reconcilation</h1>
+                
+                <p>In all likelihood, the primary source of performance gains for your app will come from reducing the amount of work that Roact's reconcilation process requires. This is accomplished by:</p>
+<ul>
+<li>Indicating to Roact that some reconciliation work can be skipped</li>
+<li>Making sure your elements only change in ways you intended</li>
+</ul>
+<h2 id="shouldupdate-lifecycle-method"><code>shouldUpdate</code> Lifecycle Method<a class="headerlink" href="#shouldupdate-lifecycle-method" title="Permanent link">&para;</a></h2>
+<p>When a Roact Component's state or props change, it will call the Component's <code>shouldUpdate</code> method to determine whether or not to re-render it. The default implementation will always return true.
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nc">Component</span><span class="p">:</span><span class="nf">shouldUpdate</span><span class="p">(</span><span class="n">newProps</span><span class="p">,</span> <span class="n">newState</span><span class="p">)</span>
+    <span class="kr">return</span> <span class="kc">true</span>
+<span class="kr">end</span>
+</pre></div></p>
+<p>If you have a more complex component that only needs to re-render in certain situations, you can either use <code>PureComponent</code> (discussed below) or implement your own <code>shouldUpdate</code> and return <code>false</code> in any case where an update is not required.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Manually implementing <code>shouldUpdate</code> is <em>dangerous</em>! If done carelessly, it can easily create confusing or subtle bugs.</p>
+<p>In most cases, the preferable solution is to use <code>PureComponent</code> instead, which has a simple and robust implementation of <code>shouldUpdate</code>.</p>
+</div>
+<h2 id="purecomponent"><code>PureComponent</code><a class="headerlink" href="#purecomponent" title="Permanent link">&para;</a></h2>
+<p>One common implementation of <code>shouldUpdate</code> is to do a shallow comparison between current and previous props and state. <code>Roact</code> provides an extension of <code>Roact.Component</code> called <code>Roact.PureComponent</code> that uses this implementation.</p>
+<p>Let's use the following example:
+<div class="codehilite"><pre><span></span><span class="kd">local</span> <span class="n">Item</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">Component</span><span class="p">:</span><span class="n">extend</span><span class="p">(</span><span class="s2">&quot;Item&quot;</span><span class="p">)</span>
+
+<span class="kr">function</span> <span class="nc">Item</span><span class="p">:</span><span class="nf">render</span><span class="p">()</span>
+    <span class="kd">local</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">props</span><span class="p">.</span><span class="n">icon</span>
+    <span class="kd">local</span> <span class="n">layoutOrder</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">props</span><span class="p">.</span><span class="n">layoutOrder</span>
+
+    <span class="c1">-- Create a list item with the item&#39;s icon and name</span>
+    <span class="kr">return</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;ImageLabel&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">LayoutOrder</span> <span class="o">=</span> <span class="n">layoutOrder</span><span class="p">,</span>
+        <span class="n">Image</span> <span class="o">=</span> <span class="n">icon</span><span class="p">,</span>
+    <span class="p">})</span>
+<span class="kr">end</span>
+
+<span class="kd">local</span> <span class="n">Inventory</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">Component</span><span class="p">:</span><span class="n">extend</span><span class="p">(</span><span class="s2">&quot;Inventory&quot;</span><span class="p">)</span>
+
+<span class="kr">function</span> <span class="nc">Inventory</span><span class="p">:</span><span class="nf">render</span><span class="p">()</span>
+    <span class="c1">-- An Inventory contains a list of items</span>
+    <span class="kd">local</span> <span class="n">items</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">state</span><span class="p">.</span><span class="n">items</span>
+
+    <span class="kd">local</span> <span class="n">itemList</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">-- Create a UIListLayout to space out our items</span>
+    <span class="n">itemList</span><span class="p">[</span><span class="s2">&quot;Layout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;UIListLayout&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">SortOrder</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">.</span><span class="n">SortOrder</span><span class="p">.</span><span class="n">LayoutOrder</span><span class="p">,</span>
+        <span class="n">FillDirection</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">.</span><span class="n">FillDirection</span><span class="p">.</span><span class="n">Vertical</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="kr">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="kr">do</span>
+        <span class="c1">-- Add the element to our list</span>
+        <span class="n">itemList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="n">Item</span><span class="p">,</span> <span class="p">{</span>
+            <span class="n">layoutOrder</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span>
+            <span class="n">icon</span> <span class="o">=</span> <span class="n">item</span><span class="p">.</span><span class="n">icon</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="kr">end</span>
+
+    <span class="c1">-- The Inventory renders a frame containing the list of Items as children</span>
+    <span class="kr">return</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;Frame&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">Size</span> <span class="o">=</span> <span class="n">UDim2</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+    <span class="p">},</span> <span class="n">itemList</span><span class="p">)</span>
+<span class="kr">end</span>
+</pre></div></p>
+<p>In the above example, adding a new item to the <code>items</code> prop of the <code>Inventory</code> would cause all of the child <code>Item</code> elements to re-render, even if they haven't changed at all. This means if you add an item to an <code>Inventory</code> that already has 5 items, the result will be 6 renders of the <code>Item</code> component.</p>
+<p>Lets change <code>Item</code> to a <code>PureComponent</code>:
+<div class="codehilite"><pre><span></span><span class="kd">local</span> <span class="n">Item</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">PureComponent</span><span class="p">:</span><span class="n">extend</span><span class="p">(</span><span class="s2">&quot;Item&quot;</span><span class="p">)</span>
+</pre></div>
+Now, if we add a new item to the end of the <code>Inventory</code> or change something about an existing item, we'll only re-render the <code>Inventory</code> itself and the modified <code>Item</code>!</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When working with <code>PureComponent</code>, it's critical to use immutable props. Immutability guarantees that a prop's reference will change any time its contents change.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>There's more to discuss about immutability. It deserves a fully fleshed-out section somewhere!</p>
+</div>
+<h2 id="stable-keys">Stable Keys<a class="headerlink" href="#stable-keys" title="Permanent link">&para;</a></h2>
+<p>Another performance improvement we can make is to use stable, unique keys to refer to our child elements.</p>
+<p>When the list that we pass into the <code>Inventory</code> component changes, Roact updates our Roblox UI by adjusting the properties of each Roblox Instance according to the new list of elements.</p>
+<p>For example, let's suppose our list of items is as follows:
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="p">{</span> <span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;sword&quot;</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">swordIcon</span> <span class="p">},</span> <span class="c1">-- [1]</span>
+    <span class="p">{</span> <span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;shield&quot;</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">shieldIcon</span> <span class="p">},</span> <span class="c1">-- [2]</span>
+<span class="p">}</span>
+</pre></div></p>
+<p>If we add a new item to the beginning, then we'll end up with a list like this:
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="p">{</span> <span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;potion&quot;</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">potionIcon</span> <span class="p">}</span> <span class="c1">-- [1]</span>
+    <span class="p">{</span> <span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;sword&quot;</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">swordIcon</span> <span class="p">},</span> <span class="c1">-- [2]</span>
+    <span class="p">{</span> <span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;shield&quot;</span><span class="p">,</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">shieldIcon</span> <span class="p">},</span> <span class="c1">-- [3]</span>
+<span class="p">}</span>
+</pre></div></p>
+<p>When Roact updates the underlying <code>ImageLabel</code> objects, it will need to change their icons so that the item at <code>[1]</code> has the potion icon, the item at <code>[2]</code> has the sword icon, and a new <code>ImageLabel</code> is added at <code>[3]</code> with the shield icon.</p>
+<p>We'd like for Roact to know that the new item was added at <code>[1]</code> and that the sword and shield items simply moved down in the list. That way it can adjust their LayoutOrder properties and let the Roblox UI system resolve the rest.</p>
+<p>So let's fix it! We'll make our list of <code>Item</code> elements use the item's id for its keys instead of the indexes in the <code>items</code> list:</p>
+<div class="codehilite"><pre><span></span><span class="kr">function</span> <span class="nc">Inventory</span><span class="p">:</span><span class="nf">render</span><span class="p">()</span>
+    <span class="c1">-- An Inventory contains a list of items</span>
+    <span class="kd">local</span> <span class="n">items</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">state</span><span class="p">.</span><span class="n">items</span>
+
+    <span class="kd">local</span> <span class="n">itemList</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">itemList</span><span class="p">[</span><span class="s2">&quot;Layout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;UIListLayout&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">SortOrder</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">.</span><span class="n">SortOrder</span><span class="p">.</span><span class="n">LayoutOrder</span><span class="p">,</span>
+        <span class="n">FillDirection</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">.</span><span class="n">FillDirection</span><span class="p">.</span><span class="n">Vertical</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="kr">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="kr">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="kr">do</span>
+<span class="hll">        <span class="c1">-- Each element is now added at a stable key</span>
+</span><span class="hll">        <span class="n">itemList</span><span class="p">[</span><span class="n">item</span><span class="p">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="n">Item</span><span class="p">,</span> <span class="p">{</span>
+</span>            <span class="n">layoutOrder</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span>
+            <span class="n">icon</span> <span class="o">=</span> <span class="n">item</span><span class="p">.</span><span class="n">icon</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="kr">end</span>
+
+    <span class="c1">-- The Inventory renders a frame containing the list of Items as children</span>
+    <span class="kr">return</span> <span class="n">Roact</span><span class="p">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;Frame&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">Size</span> <span class="o">=</span> <span class="n">UDim2</span><span class="p">.</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+    <span class="p">},</span> <span class="n">itemList</span><span class="p">)</span>
+<span class="kr">end</span>
+</pre></div>
+
+<p>Now the list of children is keyed by the stable, unique id of the item data. Their positions can change according to their LayoutOrder, but no other properties on the item need to be updated. When we add the third element to the list, Roact will set the <code>LayoutOrder</code> property on for each <code>ImageLabel</code> and only set the <code>Image</code> property on the newly added one!</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Switching to static keys might seem insignificant for <em>this</em> example, but if our <code>Item</code> component becomes more complicated and our inventory gets bigger, it can make a significant difference!</p>
+</div>
+                
+                  
+                
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../overview/" title="Overview" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Overview
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../../api-reference/" title="API Reference" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                API Reference
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      
+    
+  </body>
+</html>
